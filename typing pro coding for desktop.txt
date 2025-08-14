@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Pro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f9ff;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border: 5px solid #4fc3f7;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #0288d1;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .stat-box {
+            background-color: #4fc3f7;
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            flex: 1;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-box span:first-child {
+            font-size: 28px;
+            font-weight: bold;
+            display: block;
+        }
+
+        .text-display {
+            background-color: #e1f5fe;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            min-height: 150px;
+            max-height: 300px;
+            border: 3px dashed #4fc3f7;
+            font-size: 18px;
+            line-height: 1.6;
+            overflow-y: auto;
+        }
+
+        #text-input {
+            width: 100%;
+            height: 150px;
+            padding: 15px;
+            font-size: 16px;
+            border: 3px solid #4fc3f7;
+            border-radius: 15px;
+            resize: none;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+            background-color: #e1f5fe;
+        }
+
+        #text-input:focus {
+            outline: none;
+            border-color: #0288d1;
+            box-shadow: 0 0 10px rgba(2, 136, 209, 0.5);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        button {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 15px;
+            background-color: #4fc3f7;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        button:disabled {
+            background-color: #b3e5fc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        #difficulty-btn {
+            background-color: #ff9800;
+        }
+
+        #difficulty-btn:hover:not(:disabled) {
+            background-color: #fb8c00;
+        }
+
+        .correct {
+            color: #388e3c;
+            font-weight: bold;
+        }
+
+        .incorrect {
+            color: #d32f2f;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+
+        .current {
+            background-color: #fff59d;
+            border-radius: 5px;
+            padding: 0 2px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            50% { background-color: #ffeb3b; }
+        }
+
+        .completed-text {
+            color: #0288d1;
+            opacity: 0.7;
+        }
+
+        .scoreboard {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .scoreboard-content {
+            background-color: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+            border: 5px solid #4fc3f7;
+            max-width: 80%;
+        }
+
+        .scoreboard h2 {
+            color: #0288d1;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .score-value {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #0288d1;
+            margin: 20px 0;
+        }
+
+        .score-label {
+            font-size: 1.5rem;
+            color: #555;
+        }
+
+        #restart-btn {
+            background-color: #4fc3f7;
+            font-size: 1.5rem;
+            padding: 15px 30px;
+            margin-top: 30px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: #e1f5fe;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: #4fc3f7;
+            width: 0%;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Typing Pro</h1>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <span id="time">60</span>
+                <span>seconds</span>
+            </div>
+            <div class="stat-box">
+                <span id="wpm">0</span>
+                <span>WPM</span>
+            </div>
+            <div class="stat-box">
+                <span id="accuracy">0</span>
+                <span>% accuracy</span>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress" id="progress-bar"></div>
+        </div>
+        
+        <div class="text-display" id="text-display">
+            <div id="completed-text"></div>
+            <div id="current-text">Click "Start Typing" to begin the test!</div>
+        </div>
+        
+        <textarea id="text-input" placeholder="Click start and begin typing here..." disabled></textarea>
+        
+        <div class="controls">
+            <button id="start-btn">Start Typing</button>
+            <button id="new-text-btn" disabled>New Text</button>
+            <button id="difficulty-btn">Difficulty: Easy</button>
+        </div>
+    </div>
+
+    <div class="scoreboard" id="scoreboard">
+        <div class="scoreboard-content">
+            <h2>Your Score</h2>
+            <div>
+                <div class="score-label">Typing Speed</div>
+                <div class="score-value" id="final-wpm">0</div>
+                <div class="score-label">words per minute</div>
+            </div>
+            <div>
+                <div class="score-label">Accuracy</div>
+                <div class="score-value" id="final-accuracy">0</div>
+                <div class="score-label">percent</div>
+            </div>
+            <button id="restart-btn">Try Again</button>
+        </div>
+    </div>
+
+    <audio id="typingSound" src="https://assets.mixkit.co/sfx/preview/mixkit-keyboard-typing-1386.mp3" preload="auto"></audio>
+    <audio id="correctSound" src="https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3" preload="auto"></audio>
+    <audio id="wrongSound" src="https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-fail-notification-946.mp3" preload="auto"></audio>
+    <audio id="completeSound" src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3" preload="auto"></audio>
+    <audio id="startSound" src="https://assets.mixkit.co/sfx/preview/mixkit-game-show-suspense-waiting-668.mp3" preload="auto"></audio>
+    <audio id="endSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-complete-or-approved-mission-205.mp3" preload="auto"></audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const textDisplay = document.getElementById('text-display');
+            const completedTextEl = document.getElementById('completed-text');
+            const currentTextEl = document.getElementById('current-text');
+            const textInput = document.getElementById('text-input');
+            const startBtn = document.getElementById('start-btn');
+            const newTextBtn = document.getElementById('new-text-btn');
+            const difficultyBtn = document.getElementById('difficulty-btn');
+            const timeDisplay = document.getElementById('time');
+            const wpmDisplay = document.getElementById('wpm');
+            const accuracyDisplay = document.getElementById('accuracy');
+            const scoreboard = document.getElementById('scoreboard');
+            const finalWpm = document.getElementById('final-wpm');
+            const finalAccuracy = document.getElementById('final-accuracy');
+            const restartBtn = document.getElementById('restart-btn');
+            const progressBar = document.getElementById('progress-bar');
+            
+            // Sound effects
+            const typingSound = document.getElementById('typingSound');
+            const correctSound = document.getElementById('correctSound');
+            const wrongSound = document.getElementById('wrongSound');
+            const completeSound = document.getElementById('completeSound');
+            const startSound = document.getElementById('startSound');
+            const endSound = document.getElementById('endSound');
+            
+            // Game variables
+            let timer;
+            let timeLeft = 60;
+            let isTyping = false;
+            let totalTyped = 0;
+            let correctTyped = 0;
+            let currentPos = 0;
+            let difficulty = 'easy'; // easy, medium, hard
+            let completedText = '';
+            let currentParagraph = '';
+            let allParagraphs = '';
+            let paragraphIndex = 0;
+            let lastTypingSoundTime = 0;
+            
+            // Paragraph banks for endless typing
+            const paragraphBanks = {
+                easy: [
+                    "The quick brown fox jumps over the lazy dog. This simple sentence contains all the letters in the English alphabet. It is often used for typing practice. The fox and dog are common animals that everyone knows. Practice typing this sentence to improve your skills.",
+                    "Cats and dogs make great pets for families. They provide companionship and love to their owners. Many people enjoy playing with their pets after school or work. Pets need food, water, and attention every day. Taking care of animals teaches responsibility to children.",
+                    "The sun rises in the east and sets in the west. During the day, it provides light and warmth to the earth. Plants need sunlight to grow through photosynthesis. People enjoy sunny days for outdoor activities. Always protect your skin from too much sun exposure.",
+                    "Reading books is a wonderful way to learn new things. Libraries have many books you can borrow for free. Fiction books tell imaginary stories that can be exciting. Non-fiction books teach us facts about the real world. Make time to read every day to improve your knowledge.",
+                    "Fruits and vegetables are important for a healthy diet. They contain vitamins and minerals our bodies need. Apples, bananas, and oranges are popular fruits. Carrots, broccoli, and peas are common vegetables. Eating a variety of colors gives you different nutrients."
+                ],
+                medium: [
+                    "The development of typing skills has evolved significantly since the invention of the typewriter in the 19th century. Modern computer keyboards maintain the QWERTY layout despite more efficient alternatives being available. Regular practice is essential for improving both speed and accuracy. Professional typists can reach speeds of 65-75 words per minute while maintaining high accuracy. The ability to type without looking at the keyboard allows you to focus on content creation rather than the mechanical process.",
+                    "Ergonomics play a crucial role in typing efficiency and comfort. Proper posture involves sitting with your back straight and feet flat on the floor. The keyboard should be positioned so your elbows form a 90-degree angle. Taking frequent breaks prevents repetitive strain injuries in your hands and wrists. These practices help maintain productivity during long typing sessions while protecting your physical health.",
+                    "Touch typing is a skill that involves using all ten fingers without looking at the keyboard. Each finger is responsible for specific keys in the home row position. With practice, muscle memory develops to make typing more automatic. This technique significantly increases typing speed and reduces errors. Many schools now include touch typing as part of their computer literacy curriculum.",
+                    "The QWERTY keyboard layout was originally designed to prevent mechanical typewriters from jamming. Despite the development of more efficient layouts like Dvorak, QWERTY remains standard. This persistence demonstrates how historical decisions can influence modern technology. Learning to type efficiently on QWERTY provides transferable skills to most computer systems. The layout's ubiquity makes it a practical choice for most users.",
+                    "Digital communication has made typing an essential skill in modern society. Emails, instant messaging, and document creation all require proficient typing abilities. Employers often value fast and accurate typing for many office positions. As technology continues to evolve, typing remains a fundamental method of input. Developing strong typing skills can provide advantages in both education and career opportunities."
+                ],
+                hard: [
+                    "The cognitive psychology behind typing proficiency reveals fascinating insights into human learning processes. As typing becomes more automatic through practice, it transitions from conscious effort to procedural memory. This shift allows the conscious mind to focus on content generation rather than mechanical execution. Studies show that expert typists develop anticipatory eye movements, looking ahead in the text to prepare their fingers. This phenomenon demonstrates the complex coordination between visual processing and motor skills that develops with extensive practice.",
+                    "The history of typing technology encompasses a remarkable evolution from mechanical typewriters to modern virtual keyboards. Early typewriters required significant finger strength to press the keys and had visible typebars that would jam if struck too quickly. The transition to electric typewriters reduced physical effort while maintaining the basic QWERTY layout. Computer keyboards introduced programmability and ergonomic designs to address repetitive strain concerns. Contemporary developments include predictive text and voice recognition, yet keyboard typing remains a fundamental skill in the digital age.",
+                    "Neuroscientific research into typing reveals the remarkable plasticity of the human brain. Functional MRI studies show that extensive typing practice leads to measurable changes in the motor cortex. These neural adaptations optimize the brain's control of fine finger movements, making them more efficient. Interestingly, the brain areas activated during typing overlap with those used for musical instrument performance. This suggests that typing proficiency shares neurological characteristics with other complex motor skills requiring precise timing and coordination.",
+                    "The linguistic aspects of typing proficiency involve an intricate relationship between language processing and motor execution. Skilled typists demonstrate not just fast finger movements but also an ability to anticipate word patterns and grammatical structures. This predictive capacity allows for smoother transitions between words and more efficient typing overall. Research indicates that typing speed correlates with both motor skill and linguistic fluency. The interplay between these cognitive domains makes typing a uniquely complex human skill worthy of continued study.",
+                    "Comparative studies of different keyboard layouts have yielded surprising insights into human-computer interaction. While alternative layouts like Dvorak and Colemak demonstrate theoretical advantages in finger travel distance, the practical benefits for most users remain debated. The QWERTY layout's persistence highlights the importance of standardization and network effects in technology adoption. Interestingly, studies show that the specific layout matters less than consistent practice with that layout. This finding emphasizes that typing proficiency depends more on dedicated practice than on the theoretical optimality of the input system."
+                ]
+            };
+            
+            // Initialize with first paragraph
+            loadParagraphs();
+            displayCurrentText();
+            
+            // Event listeners
+            startBtn.addEventListener('click', startGame);
+            newTextBtn.addEventListener('click', resetTest);
+            difficultyBtn.addEventListener('click', changeDifficulty);
+            textInput.addEventListener('input', checkTyping);
+            restartBtn.addEventListener('click', function() {
+                scoreboard.style.display = 'none';
+                startBtn.disabled = false;
+                newTextBtn.disabled = true;
+                loadParagraphs();
+                displayCurrentText();
+            });
+            
+            // Functions
+            function loadParagraphs() {
+                const paragraphs = paragraphBanks[difficulty];
+                allParagraphs = paragraphs.join(' ');
+                currentParagraph = allParagraphs;
+                completedText = '';
+                currentPos = 0;
+            }
+            
+            function displayCurrentText() {
+                currentTextEl.innerHTML = '';
+                const textArray = currentParagraph.split('');
+                
+                textArray.forEach((char, index) => {
+                    const span = document.createElement('span');
+                    span.textContent = char;
+                    if (index === 0 && currentPos === 0) {
+                        span.className = 'current';
+                    }
+                    currentTextEl.appendChild(span);
+                });
+                
+                // Display completed text
+                completedTextEl.innerHTML = '';
+                if (completedText.length > 0) {
+                    const div = document.createElement('div');
+                    div.textContent = completedText;
+                    div.className = 'completed-text';
+                    completedTextEl.appendChild(div);
+                }
+                
+                // Update progress bar
+                const totalChars = allParagraphs.length;
+                const completedChars = completedText.length;
+                const progress = (completedChars / totalChars) * 100;
+                progressBar.style.width = `${progress}%`;
+            }
+            
+            function startGame() {
+                if (isTyping) return;
+                
+                // Play start sound
+                startSound.currentTime = 0;
+                startSound.play();
+                
+                isTyping = true;
+                timeLeft = 60;
+                totalTyped = 0;
+                correctTyped = 0;
+                currentPos = 0;
+                
+                loadParagraphs();
+                textInput.disabled = false;
+                textInput.value = '';
+                textInput.focus();
+                
+                startBtn.disabled = true;
+                newTextBtn.disabled = true;
+                
+                // Reset timer display
+                timeDisplay.textContent = timeLeft;
+                timeDisplay.style.color = '';
+                timeDisplay.style.fontSize = '';
+                
+                // Start timer
+                timer = setInterval(updateTimer, 1000);
+                
+                // Update display
+                displayCurrentText();
+                updateStats();
+            }
+            
+            function updateTimer() {
+                timeLeft--;
+                timeDisplay.textContent = timeLeft;
+                
+                if (timeLeft <= 10) {
+                    timeDisplay.style.color = '#d32f2f';
+                    timeDisplay.style.fontSize = '32px';
+                }
+                
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }
+            
+            function endGame() {
+                clearInterval(timer);
+                isTyping = false;
+                textInput.disabled = true;
+                
+                // Play end sound
+                endSound.currentTime = 0;
+                endSound.play();
+                
+                // Show scoreboard
+                finalWpm.textContent = wpmDisplay.textContent;
+                finalAccuracy.textContent = accuracyDisplay.textContent;
+                scoreboard.style.display = 'flex';
+            }
+            
+            function resetTest() {
+                startBtn.disabled = false;
+                newTextBtn.disabled = true;
+                loadParagraphs();
+                displayCurrentText();
+            }
+            
+            function changeDifficulty() {
+                const difficulties = ['easy', 'medium', 'hard'];
+                const difficultyNames = ['Easy', 'Medium', 'Hard'];
+                const currentIndex = difficulties.indexOf(difficulty);
+                difficulty = difficulties[(currentIndex + 1) % difficulties.length];
+                difficultyBtn.textContent = "Difficulty: " + difficultyNames[(currentIndex + 1) % difficulties.length];
+                resetTest();
+            }
+            
+            function checkTyping() {
+                if (!isTyping) return;
+                
+                // Play typing sound (with rate limiting)
+                const now = Date.now();
+                if (now - lastTypingSoundTime > 100) {
+                    typingSound.currentTime = 0;
+                    typingSound.play();
+                    lastTypingSoundTime = now;
+                }
+                
+                const inputArray = textInput.value.split('');
+                const textArray = currentParagraph.split('');
+                
+                // Reset all spans
+                const spans = currentTextEl.querySelectorAll('span');
+                spans.forEach(span => {
+                    span.className = '';
+                });
+                
+                // Check each character
+                let newCorrect = 0;
+                inputArray.forEach((char, index) => {
+                    if (index < textArray.length) {
+                        if (char === textArray[index]) {
+                            spans[index].className = 'correct';
+                            newCorrect++;
+                            
+                            // Play correct sound occasionally
+                            if (Math.random() < 0.1) {
+                                correctSound.currentTime = 0;
+                                correctSound.play();
+                            }
+                        } else {
+                            spans[index].className = 'incorrect';
+                            
+                            // Play wrong sound occasionally
+                            if (Math.random() < 0.3) {
+                                wrongSound.currentTime = 0;
+                                wrongSound.play();
+                            }
+                        }
+                    }
+                });
+                
+                // Update current position
+                currentPos = inputArray.length;
+                
+                // Check if we've reached the end of current paragraph
+                if (currentPos >= textArray.length) {
+                    // Add completed text
+                    completedText += currentParagraph;
+                    
+                    // Get new paragraph (just continue with the rest of the text)
+                    currentParagraph = allParagraphs.substring(completedText.length);
+                    
+                    // Reset input and position
+                    textInput.value = '';
+                    currentPos = 0;
+                    
+                    // Play completion sound
+                    completeSound.currentTime = 0;
+                    completeSound.play();
+                    
+                    // If we've completed all text, reload paragraphs
+                    if (currentParagraph.length === 0) {
+                        loadParagraphs();
+                    }
+                }
+                
+                // Highlight current position
+                if (currentPos < textArray.length) {
+                    spans[currentPos].className = 'current';
+                }
+                
+                // Update stats
+                totalTyped = inputArray.length;
+                correctTyped = newCorrect;
+                updateStats();
+                
+                // Update display
+                displayCurrentText();
+            }
+            
+            function updateStats() {
+                // Calculate WPM (5 characters = 1 word)
+                const minutes = (60 - timeLeft) / 60 || 1;
+                const wpm = Math.round((correctTyped / 5) / minutes);
+                wpmDisplay.textContent = wpm;
+                
+                // Calculate accuracy
+                const accuracy = totalTyped > 0 ? Math.round((correctTyped / totalTyped) * 100) : 0;
+                accuracyDisplay.textContent = accuracy;
+                
+                // Color code based on performance
+                if (accuracy >= 90) {
+                    accuracyDisplay.style.color = '#388e3c';
+                } else if (accuracy >= 70) {
+                    accuracyDisplay.style.color = '#ff9800';
+                } else {
+                    accuracyDisplay.style.color = '#d32f2f';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
